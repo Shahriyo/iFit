@@ -20,6 +20,7 @@ interface TimerSettingsProps {
     intervalDuration: number;
     intervalCount: number;
     soundEnabled: boolean;
+    countDirection: 'up' | 'down';
   }) => void;
 }
 
@@ -27,6 +28,7 @@ export default function TimerSettings({ onSettingsChange }: TimerSettingsProps) 
   const [intervalDuration, setIntervalDuration] = useState(2);
   const [intervalCount, setIntervalCount] = useState(4);
   const [soundEnabled, setSoundEnabled] = useState(true);
+  const [countDirection, setCountDirection] = useState<'up' | 'down'>('down');
   const { toast } = useToast();
 
   // Define the type for timer settings
@@ -35,6 +37,7 @@ export default function TimerSettings({ onSettingsChange }: TimerSettingsProps) 
     intervalDuration: number;
     intervalCount: number;
     soundEnabled: boolean;
+    countDirection: 'up' | 'down';
     id?: number;
   }
   
@@ -75,22 +78,29 @@ export default function TimerSettings({ onSettingsChange }: TimerSettingsProps) 
       setIntervalCount(settings.intervalCount);
       setSoundEnabled(settings.soundEnabled);
       
+      // Set count direction if available, otherwise use default
+      if ('countDirection' in settings) {
+        setCountDirection(settings.countDirection as 'up' | 'down');
+      }
+      
       // Notify parent component about the initial settings
       onSettingsChange({
         intervalDuration: settings.intervalDuration,
         intervalCount: settings.intervalCount,
-        soundEnabled: settings.soundEnabled
+        soundEnabled: settings.soundEnabled,
+        countDirection: settings.countDirection || 'down'
       });
     }
   }, [settings, onSettingsChange]);
 
   // Update settings handler
-  const handleSettingsChange = (field: string, value: number | boolean) => {
+  const handleSettingsChange = (field: string, value: number | boolean | string) => {
     let newSettings: TimerSettingsData = { 
       userId: 1, // Using placeholder user ID
       intervalDuration: intervalDuration * 60, // Store in seconds
-      intervalCount, 
-      soundEnabled 
+      intervalCount,
+      soundEnabled,
+      countDirection
     };
 
     if (field === 'intervalDuration') {
@@ -102,6 +112,9 @@ export default function TimerSettings({ onSettingsChange }: TimerSettingsProps) 
     } else if (field === 'soundEnabled') {
       setSoundEnabled(value as boolean);
       newSettings.soundEnabled = value as boolean;
+    } else if (field === 'countDirection') {
+      setCountDirection(value as 'up' | 'down');
+      newSettings.countDirection = value as 'up' | 'down';
     }
 
     // Notify parent component
@@ -180,6 +193,24 @@ export default function TimerSettings({ onSettingsChange }: TimerSettingsProps) 
           <Label htmlFor="sound-enabled" className="ml-2 block text-sm text-gray-700">
             Enable Sound Alerts
           </Label>
+        </div>
+        
+        <div className="mb-4">
+          <Label htmlFor="count-direction" className="block text-sm font-medium text-gray-700 mb-1">
+            Count Direction
+          </Label>
+          <Select 
+            value={countDirection} 
+            onValueChange={(value) => handleSettingsChange('countDirection', value)}
+          >
+            <SelectTrigger className="w-full">
+              <SelectValue placeholder="Select count direction" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="down">Count Down</SelectItem>
+              <SelectItem value="up">Count Up</SelectItem>
+            </SelectContent>
+          </Select>
         </div>
       </CardContent>
     </Card>

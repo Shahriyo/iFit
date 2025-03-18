@@ -165,6 +165,7 @@ export class MemStorage implements IStorage {
         intervalDuration: settings.intervalDuration ?? existingSettings.intervalDuration,
         intervalCount: settings.intervalCount ?? existingSettings.intervalCount,
         soundEnabled: settings.soundEnabled ?? existingSettings.soundEnabled,
+        countDirection: settings.countDirection ?? existingSettings.countDirection ?? 'down',
         userId: settings.userId
       };
       this.timerSettings.set(existingSettings.id, updatedSettings);
