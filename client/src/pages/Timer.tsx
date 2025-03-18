@@ -104,6 +104,7 @@ export default function Timer() {
         totalTime={timer.totalTime}
         currentInterval={timer.currentInterval}
         totalIntervals={timer.totalIntervals}
+        countDirection={timer.countDirection}
       />
       
       <TimerControls 

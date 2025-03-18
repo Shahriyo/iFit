@@ -6,22 +6,30 @@ interface TimerDisplayProps {
   totalTime: number;
   currentInterval: number;
   totalIntervals: number;
+  countDirection?: 'up' | 'down';
 }
 
 export default function TimerDisplay({
   currentTime,
   totalTime,
   currentInterval,
-  totalIntervals
+  totalIntervals,
+  countDirection = 'down'
 }: TimerDisplayProps) {
   const [offset, setOffset] = useState(0);
   
   useEffect(() => {
     const circumference = 2 * Math.PI * 45;
-    const timePercent = currentTime / totalTime;
+    // For count up, we use direct percentage; for count down, we invert it
+    let timePercent;
+    if (countDirection === 'up') {
+      timePercent = currentTime / totalTime;
+    } else {
+      timePercent = (totalTime - currentTime) / totalTime;
+    }
     const calculatedOffset = circumference * (1 - timePercent);
     setOffset(calculatedOffset);
-  }, [currentTime, totalTime]);
+  }, [currentTime, totalTime, countDirection]);
 
   return (
     <div className="relative w-64 h-64 my-6 flex items-center justify-center">
