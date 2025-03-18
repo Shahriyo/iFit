@@ -12,7 +12,8 @@ export default function Timer() {
   const [timerSettings, setTimerSettings] = useState({
     intervalDuration: 120, // 2 minutes in seconds
     intervalCount: 4,
-    soundEnabled: true
+    soundEnabled: true,
+    countDirection: 'down' as 'up' | 'down'
   });
 
   // Define type for timer settings
@@ -21,6 +22,7 @@ export default function Timer() {
     intervalDuration: number;
     intervalCount: number;
     soundEnabled: boolean;
+    countDirection: 'up' | 'down';
     id?: number;
   }
   
@@ -38,7 +40,8 @@ export default function Timer() {
       setTimerSettings({
         intervalDuration: settings.intervalDuration,
         intervalCount: settings.intervalCount,
-        soundEnabled: settings.soundEnabled
+        soundEnabled: settings.soundEnabled,
+        countDirection: settings.countDirection || 'down'
       });
     }
   }, [settings]);
@@ -59,6 +62,7 @@ export default function Timer() {
   const timer = useTimer({
     initialTime: timerSettings.intervalDuration,
     totalIntervals: timerSettings.intervalCount,
+    countDirection: timerSettings.countDirection,
     onIntervalComplete: handleIntervalComplete,
     onWorkoutComplete: handleWorkoutComplete
   });
@@ -67,6 +71,7 @@ export default function Timer() {
     intervalDuration: number; 
     intervalCount: number; 
     soundEnabled: boolean;
+    countDirection: 'up' | 'down';
   }) => {
     setTimerSettings(newSettings);
     timer.setTime(newSettings.intervalDuration);
