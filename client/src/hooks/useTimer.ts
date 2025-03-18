@@ -3,6 +3,7 @@ import { useState, useEffect, useRef, useCallback } from 'react';
 interface UseTimerProps {
   initialTime: number;
   totalIntervals: number;
+  countDirection?: 'up' | 'down';
   onIntervalComplete?: (interval: number) => void;
   onWorkoutComplete?: () => void;
 }
@@ -13,6 +14,7 @@ interface UseTimerReturn {
   currentInterval: number;
   totalIntervals: number;
   isRunning: boolean;
+  countDirection: 'up' | 'down';
   startTimer: () => void;
   pauseTimer: () => void;
   resetTimer: () => void;
@@ -23,6 +25,7 @@ interface UseTimerReturn {
 export default function useTimer({
   initialTime,
   totalIntervals,
+  countDirection = 'down',
   onIntervalComplete,
   onWorkoutComplete
 }: UseTimerProps): UseTimerReturn {
@@ -57,30 +60,57 @@ export default function useTimer({
     
     timerRef.current = setInterval(() => {
       setCurrentTime(prevTime => {
-        console.log('Timer tick:', prevTime);
-        if (prevTime <= 1) {
-          // Interval complete
-          if (currentInterval < totalIntervals) {
-            // Move to next interval
-            setCurrentInterval(prev => {
-              const nextInterval = prev + 1;
-              if (onIntervalComplete) {
-                onIntervalComplete(prev);
+        console.log('Timer tick:', prevTime, 'Direction:', countDirection);
+        
+        if (countDirection === 'down') {
+          if (prevTime <= 1) {
+            // Interval complete
+            if (currentInterval < totalIntervals) {
+              // Move to next interval
+              setCurrentInterval(prev => {
+                const nextInterval = prev + 1;
+                if (onIntervalComplete) {
+                  onIntervalComplete(prev);
+                }
+                return nextInterval;
+              });
+              return initialTime;
+            } else {
+              // All intervals complete
+              clearInterval(timerRef.current!);
+              setIsRunning(false);
+              if (onWorkoutComplete) {
+                onWorkoutComplete();
               }
-              return nextInterval;
-            });
-            return initialTime;
-          } else {
-            // All intervals complete
-            clearInterval(timerRef.current!);
-            setIsRunning(false);
-            if (onWorkoutComplete) {
-              onWorkoutComplete();
+              return 0;
             }
-            return 0;
           }
+          return prevTime - 1; // Count down
+        } else { // countDirection === 'up'
+          if (prevTime >= initialTime) {
+            // Interval complete
+            if (currentInterval < totalIntervals) {
+              // Move to next interval
+              setCurrentInterval(prev => {
+                const nextInterval = prev + 1;
+                if (onIntervalComplete) {
+                  onIntervalComplete(prev);
+                }
+                return nextInterval;
+              });
+              return 0; // Reset to 0 for next interval when counting up
+            } else {
+              // All intervals complete
+              clearInterval(timerRef.current!);
+              setIsRunning(false);
+              if (onWorkoutComplete) {
+                onWorkoutComplete();
+              }
+              return initialTime;
+            }
+          }
+          return prevTime + 1; // Count up
         }
-        return prevTime - 1;
       });
     }, 1000);
     
@@ -90,7 +120,7 @@ export default function useTimer({
         clearInterval(timerRef.current);
       }
     };
-  }, [isRunning, currentInterval, totalIntervals, initialTime, onIntervalComplete, onWorkoutComplete]);
+  }, [isRunning, currentInterval, totalIntervals, initialTime, countDirection, onIntervalComplete, onWorkoutComplete]);
 
   const pauseTimer = useCallback(() => {
     if (timerRef.current) {
@@ -104,9 +134,9 @@ export default function useTimer({
       clearInterval(timerRef.current);
     }
     setIsRunning(false);
-    setCurrentTime(initialTime);
+    setCurrentTime(countDirection === 'down' ? initialTime : 0);
     setCurrentInterval(1);
-  }, [initialTime]);
+  }, [initialTime, countDirection]);
 
   const setTime = useCallback((time: number) => {
     setCurrentTime(time);
@@ -122,6 +152,7 @@ export default function useTimer({
     currentInterval,
     totalIntervals,
     isRunning,
+    countDirection,
     startTimer,
     pauseTimer,
     resetTimer,

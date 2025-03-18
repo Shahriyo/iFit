@@ -177,7 +177,8 @@ export class MemStorage implements IStorage {
         userId: settings.userId,
         intervalDuration: settings.intervalDuration ?? 120, // Default to 2 minutes
         intervalCount: settings.intervalCount ?? 4,         // Default to 4 intervals
-        soundEnabled: settings.soundEnabled ?? true         // Default to sound enabled
+        soundEnabled: settings.soundEnabled ?? true,        // Default to sound enabled
+        countDirection: settings.countDirection ?? 'down'   // Default to countdown
       };
       this.timerSettings.set(id, newSettings);
       return newSettings;

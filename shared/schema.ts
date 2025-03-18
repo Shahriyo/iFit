@@ -66,6 +66,7 @@ export const timerSettings = pgTable("timer_settings", {
   intervalDuration: integer("interval_duration").notNull().default(120), // in seconds
   intervalCount: integer("interval_count").notNull().default(4),
   soundEnabled: boolean("sound_enabled").notNull().default(true),
+  countDirection: text("count_direction").notNull().default("down"), // "up" or "down"
 });
 
 export const insertTimerSettingsSchema = createInsertSchema(timerSettings).omit({
