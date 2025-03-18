@@ -44,10 +44,10 @@ export default function useTimer({
     };
   }, []);
 
-  // Reset timer when initialTime changes
+  // Reset timer when initialTime or countDirection changes
   useEffect(() => {
-    setCurrentTime(initialTime);
-  }, [initialTime]);
+    setCurrentTime(countDirection === 'down' ? initialTime : 0);
+  }, [initialTime, countDirection]);
 
   const startTimer = useCallback(() => {
     if (isRunning) return;
@@ -60,7 +60,6 @@ export default function useTimer({
     
     timerRef.current = setInterval(() => {
       setCurrentTime(prevTime => {
-        console.log('Timer tick:', prevTime, 'Direction:', countDirection);
         
         if (countDirection === 'down') {
           if (prevTime <= 1) {
@@ -139,8 +138,9 @@ export default function useTimer({
   }, [initialTime, countDirection]);
 
   const setTime = useCallback((time: number) => {
-    setCurrentTime(time);
-  }, []);
+    // When setting a new time, we should respect the count direction
+    setCurrentTime(countDirection === 'down' ? time : 0);
+  }, [countDirection]);
 
   const setIntervals = useCallback((intervals: number) => {
     setCurrentInterval(prev => Math.min(prev, intervals));
