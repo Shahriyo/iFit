@@ -50,8 +50,14 @@ export default function useTimer({
     if (isRunning) return;
     
     setIsRunning(true);
+    // Clear any existing timer
+    if (timerRef.current) {
+      clearInterval(timerRef.current);
+    }
+    
     timerRef.current = setInterval(() => {
       setCurrentTime(prevTime => {
+        console.log('Timer tick:', prevTime);
         if (prevTime <= 1) {
           // Interval complete
           if (currentInterval < totalIntervals) {
@@ -77,6 +83,13 @@ export default function useTimer({
         return prevTime - 1;
       });
     }, 1000);
+    
+    // Return a cleanup function
+    return () => {
+      if (timerRef.current) {
+        clearInterval(timerRef.current);
+      }
+    };
   }, [isRunning, currentInterval, totalIntervals, initialTime, onIntervalComplete, onWorkoutComplete]);
 
   const pauseTimer = useCallback(() => {

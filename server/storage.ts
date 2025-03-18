@@ -159,12 +159,26 @@ export class MemStorage implements IStorage {
     const existingSettings = await this.getTimerSettings(settings.userId);
     
     if (existingSettings) {
-      const updatedSettings = { ...existingSettings, ...settings };
+      // Make sure all required fields are present
+      const updatedSettings: TimerSettings = { 
+        ...existingSettings,
+        intervalDuration: settings.intervalDuration ?? existingSettings.intervalDuration,
+        intervalCount: settings.intervalCount ?? existingSettings.intervalCount,
+        soundEnabled: settings.soundEnabled ?? existingSettings.soundEnabled,
+        userId: settings.userId
+      };
       this.timerSettings.set(existingSettings.id, updatedSettings);
       return updatedSettings;
     } else {
       const id = this.currentTimerSettingsId++;
-      const newSettings: TimerSettings = { ...settings, id };
+      // Make sure all fields are properly defined for new settings
+      const newSettings: TimerSettings = { 
+        id,
+        userId: settings.userId,
+        intervalDuration: settings.intervalDuration ?? 120, // Default to 2 minutes
+        intervalCount: settings.intervalCount ?? 4,         // Default to 4 intervals
+        soundEnabled: settings.soundEnabled ?? true         // Default to sound enabled
+      };
       this.timerSettings.set(id, newSettings);
       return newSettings;
     }

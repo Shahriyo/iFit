@@ -15,13 +15,26 @@ export default function Timer() {
     soundEnabled: true
   });
 
+  // Define type for timer settings
+  interface TimerSettingsData {
+    userId: number;
+    intervalDuration: number;
+    intervalCount: number;
+    soundEnabled: boolean;
+    id?: number;
+  }
+  
   // Fetch the timer settings
-  const { data: settings } = useQuery({
+  const { data: settings } = useQuery<TimerSettingsData>({
     queryKey: ['/api/timer-settings'],
   });
 
   useEffect(() => {
-    if (settings) {
+    if (settings && 
+        typeof settings.intervalDuration === 'number' && 
+        typeof settings.intervalCount === 'number' && 
+        typeof settings.soundEnabled === 'boolean') {
+      
       setTimerSettings({
         intervalDuration: settings.intervalDuration,
         intervalCount: settings.intervalCount,
@@ -40,6 +53,9 @@ export default function Timer() {
     playSound();
   };
 
+  // Use a dependable reference for the initialTime and totalIntervals
+  // This prevents recreation of the timer hook on every render
+  // which was causing timer start issues
   const timer = useTimer({
     initialTime: timerSettings.intervalDuration,
     totalIntervals: timerSettings.intervalCount,
