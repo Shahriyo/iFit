@@ -62,7 +62,7 @@ export default function useTimer({
       setCurrentTime(prevTime => {
         
         if (countDirection === 'down') {
-          if (prevTime <= 1) {
+          if (prevTime <= 0) {
             // Interval complete
             if (currentInterval < totalIntervals) {
               // Move to next interval
@@ -84,7 +84,7 @@ export default function useTimer({
               return 0;
             }
           }
-          return prevTime - 1; // Count down
+          return prevTime > 0 ? prevTime - 1 : 0; // Count down safely
         } else { // countDirection === 'up'
           if (prevTime >= initialTime) {
             // Interval complete
