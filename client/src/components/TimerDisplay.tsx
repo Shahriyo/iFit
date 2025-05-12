@@ -17,6 +17,25 @@ export default function TimerDisplay({
   countDirection = 'down'
 }: TimerDisplayProps) {
   const [offset, setOffset] = useState(0);
+  // Create a local formatted time state to ensure rendering
+  const [formattedTime, setFormattedTime] = useState(formatTime(currentTime));
+  
+  // Update formatted time when currentTime changes
+  useEffect(() => {
+    setFormattedTime(formatTime(currentTime));
+    console.log('Current time:', currentTime, 'Formatted:', formatTime(currentTime));
+  }, [currentTime]);
+  
+  // Debug logging
+  useEffect(() => {
+    console.log('TimerDisplay updated:', { 
+      currentTime, 
+      formatted: formatTime(currentTime),
+      totalTime, 
+      currentInterval, 
+      totalIntervals 
+    });
+  }, [currentTime, totalTime, currentInterval, totalIntervals]);
   
   useEffect(() => {
     const circumference = 2 * Math.PI * 45;
@@ -49,7 +68,7 @@ export default function TimerDisplay({
           strokeDashoffset={offset}
           className="timer-progress"
           style={{
-            transition: "stroke-dashoffset 1s linear",
+            transition: "stroke-dashoffset 0.3s ease",
             transform: "rotate(-90deg)",
             transformOrigin: "50% 50%"
           }}
@@ -58,7 +77,7 @@ export default function TimerDisplay({
       
       {/* Timer numbers */}
       <div className="text-center">
-        <div className="text-5xl font-bold">{formatTime(currentTime)}</div>
+        <div className="text-5xl font-bold" key={currentTime}>{formattedTime}</div>
         <div className="text-sm text-gray-500 mt-1">Interval {currentInterval}/{totalIntervals}</div>
       </div>
     </div>

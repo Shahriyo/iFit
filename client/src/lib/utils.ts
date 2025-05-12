@@ -8,7 +8,9 @@ export function cn(...inputs: ClassValue[]) {
 export function formatTime(seconds: number): string {
   const mins = Math.floor(seconds / 60);
   const secs = seconds % 60;
-  return `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
+  const formatted = `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
+  console.log(`Formatting ${seconds} seconds to: ${formatted}`);
+  return formatted;
 }
 
 export function calculateCaloriesBurned(duration: number, intensity: number): number {

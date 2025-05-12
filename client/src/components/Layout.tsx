@@ -22,7 +22,7 @@ export default function Layout({ children }: LayoutProps) {
       case "/history":
         return "History";
       default:
-        return "FitTrack";
+        return "iFit";
     }
   };
 
@@ -30,7 +30,7 @@ export default function Layout({ children }: LayoutProps) {
     <div className="min-h-screen flex flex-col bg-background">
       <header className="bg-primary text-primary-foreground p-4 shadow-md">
         <div className="flex justify-between items-center">
-          <h1 className="text-xl font-bold">FitTrack</h1>
+          <h1 className="text-xl font-bold">iFit</h1>
           <Sheet>
             <SheetTrigger asChild>
               <button className="p-2">

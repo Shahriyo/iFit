@@ -32,119 +32,148 @@ export default function useTimer({
   const [currentTime, setCurrentTime] = useState(initialTime);
   const [isRunning, setIsRunning] = useState(false);
   const [currentInterval, setCurrentInterval] = useState(1);
-  const timerRef = useRef<NodeJS.Timeout | null>(null);
   const totalTime = initialTime;
-
-  // Cleanup interval on unmount
+  
+  // Store current timer state in ref to avoid stale closures in setInterval
+  const stateRef = useRef({
+    isRunning,
+    currentTime,
+    currentInterval,
+    initialTime,
+    totalIntervals,
+    countDirection
+  });
+  
+  // Update ref whenever state changes
   useEffect(() => {
+    stateRef.current = {
+      isRunning,
+      currentTime,
+      currentInterval,
+      initialTime,
+      totalIntervals,
+      countDirection
+    };
+  }, [isRunning, currentTime, currentInterval, initialTime, totalIntervals, countDirection]);
+  
+  // Timer interval ref
+  const intervalRef = useRef<NodeJS.Timeout | null>(null);
+  
+  // Primary timer effect
+  useEffect(() => {
+    // Clear timer on unmount
     return () => {
-      if (timerRef.current) {
-        clearInterval(timerRef.current);
+      if (intervalRef.current) {
+        clearInterval(intervalRef.current);
       }
     };
   }, []);
-
-  // Reset timer when initialTime or countDirection changes
+  
+  // Effect to handle timer logic when running state changes
   useEffect(() => {
-    setCurrentTime(countDirection === 'down' ? initialTime : 0);
-  }, [initialTime, countDirection]);
-
-  const startTimer = useCallback(() => {
-    if (isRunning) return;
-    
-    setIsRunning(true);
-    // Clear any existing timer
-    if (timerRef.current) {
-      clearInterval(timerRef.current);
+    if (isRunning) {
+      // Start timer
+      intervalRef.current = setInterval(() => {
+        const state = stateRef.current;
+        
+        if (state.countDirection === 'down') {
+          // Decrement time
+          if (state.currentTime > 0) {
+            setCurrentTime(time => time - 1);
+          } else {
+            // Handle interval completion
+            if (state.currentInterval < state.totalIntervals) {
+              if (onIntervalComplete) {
+                onIntervalComplete(state.currentInterval);
+              }
+              setCurrentInterval(interval => interval + 1);
+              setCurrentTime(state.initialTime);
+            } else {
+              // Workout complete
+              if (onWorkoutComplete) {
+                onWorkoutComplete();
+              }
+              if (intervalRef.current) {
+                clearInterval(intervalRef.current);
+              }
+              setIsRunning(false);
+            }
+          }
+        } else {
+          // Count up logic
+          if (state.currentTime < state.initialTime) {
+            setCurrentTime(time => time + 1);
+          } else {
+            // Handle interval completion
+            if (state.currentInterval < state.totalIntervals) {
+              if (onIntervalComplete) {
+                onIntervalComplete(state.currentInterval);
+              }
+              setCurrentInterval(interval => interval + 1);
+              setCurrentTime(0);
+            } else {
+              // Workout complete
+              if (onWorkoutComplete) {
+                onWorkoutComplete();
+              }
+              if (intervalRef.current) {
+                clearInterval(intervalRef.current);
+              }
+              setIsRunning(false);
+            }
+          }
+        }
+      }, 1000);
+    } else {
+      // Stop timer
+      if (intervalRef.current) {
+        clearInterval(intervalRef.current);
+        intervalRef.current = null;
+      }
     }
     
-    timerRef.current = setInterval(() => {
-      setCurrentTime(prevTime => {
-        
-        if (countDirection === 'down') {
-          if (prevTime <= 0) {
-            // Interval complete
-            if (currentInterval < totalIntervals) {
-              // Move to next interval
-              setCurrentInterval(prev => {
-                const nextInterval = prev + 1;
-                if (onIntervalComplete) {
-                  onIntervalComplete(prev);
-                }
-                return nextInterval;
-              });
-              return initialTime;
-            } else {
-              // All intervals complete
-              clearInterval(timerRef.current!);
-              setIsRunning(false);
-              if (onWorkoutComplete) {
-                onWorkoutComplete();
-              }
-              return 0;
-            }
-          }
-          return prevTime > 0 ? prevTime - 1 : 0; // Count down safely
-        } else { // countDirection === 'up'
-          if (prevTime >= initialTime) {
-            // Interval complete
-            if (currentInterval < totalIntervals) {
-              // Move to next interval
-              setCurrentInterval(prev => {
-                const nextInterval = prev + 1;
-                if (onIntervalComplete) {
-                  onIntervalComplete(prev);
-                }
-                return nextInterval;
-              });
-              return 0; // Reset to 0 for next interval when counting up
-            } else {
-              // All intervals complete
-              clearInterval(timerRef.current!);
-              setIsRunning(false);
-              if (onWorkoutComplete) {
-                onWorkoutComplete();
-              }
-              return initialTime;
-            }
-          }
-          return prevTime + 1; // Count up
-        }
-      });
-    }, 1000);
-    
-    // Return a cleanup function
+    // Cleanup
     return () => {
-      if (timerRef.current) {
-        clearInterval(timerRef.current);
+      if (intervalRef.current) {
+        clearInterval(intervalRef.current);
       }
     };
-  }, [isRunning, currentInterval, totalIntervals, initialTime, countDirection, onIntervalComplete, onWorkoutComplete]);
+  }, [isRunning, onIntervalComplete, onWorkoutComplete]);
+  
+  // Reset timer when initialTime changes
+  useEffect(() => {
+    if (!isRunning) {
+      setCurrentTime(countDirection === 'down' ? initialTime : 0);
+    }
+  }, [initialTime, countDirection, isRunning]);
+
+  const startTimer = useCallback(() => {
+    if (!isRunning) {
+      setIsRunning(true);
+    }
+  }, [isRunning]);
 
   const pauseTimer = useCallback(() => {
-    if (timerRef.current) {
-      clearInterval(timerRef.current);
-    }
     setIsRunning(false);
   }, []);
 
   const resetTimer = useCallback(() => {
-    if (timerRef.current) {
-      clearInterval(timerRef.current);
-    }
     setIsRunning(false);
     setCurrentTime(countDirection === 'down' ? initialTime : 0);
     setCurrentInterval(1);
   }, [initialTime, countDirection]);
 
   const setTime = useCallback((time: number) => {
-    // When setting a new time, we should respect the count direction
-    setCurrentTime(countDirection === 'down' ? time : 0);
-  }, [countDirection]);
+    if (!isRunning) {
+      setCurrentTime(countDirection === 'down' ? time : 0);
+    }
+  }, [countDirection, isRunning]);
 
   const setIntervals = useCallback((intervals: number) => {
-    setCurrentInterval(prev => Math.min(prev, intervals));
-  }, []);
+    if (!isRunning) {
+      setCurrentInterval(prev => Math.min(prev, intervals));
+    }
+  }, [isRunning]);
 
   return {
     currentTime,

@@ -14,11 +14,27 @@ export default function TimerControls({
   onPause,
   onReset
 }: TimerControlsProps) {
+  
+  const handleStart = () => {
+    console.log("Start button clicked");
+    onStart();
+  };
+  
+  const handlePause = () => {
+    console.log("Pause button clicked");
+    onPause();
+  };
+  
+  const handleReset = () => {
+    console.log("Reset button clicked");
+    onReset();
+  };
+  
   return (
     <div className="flex space-x-4 mt-4">
       <Button 
         variant={isRunning ? "outline" : "default"}
-        onClick={onStart}
+        onClick={handleStart}
         className="px-6 py-3 rounded-full shadow-md flex items-center"
         disabled={isRunning}
       >
@@ -28,7 +44,7 @@ export default function TimerControls({
       
       <Button 
         variant="outline"
-        onClick={onPause}
+        onClick={handlePause}
         className="px-6 py-3 rounded-full shadow-md flex items-center"
         disabled={!isRunning}
       >
@@ -38,7 +54,7 @@ export default function TimerControls({
       
       <Button 
         variant="outline"
-        onClick={onReset}
+        onClick={handleReset}
         className="px-6 py-3 rounded-full shadow-md flex items-center"
       >
         <RefreshCw className="mr-1" size={18} />

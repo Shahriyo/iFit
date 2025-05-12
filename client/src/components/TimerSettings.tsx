@@ -25,7 +25,7 @@ interface TimerSettingsProps {
 }
 
 export default function TimerSettings({ onSettingsChange }: TimerSettingsProps) {
-  const [intervalDuration, setIntervalDuration] = useState(2);
+  const [intervalDuration, setIntervalDuration] = useState(120); // 2 minutes in seconds
   const [intervalCount, setIntervalCount] = useState(4);
   const [soundEnabled, setSoundEnabled] = useState(true);
   const [countDirection, setCountDirection] = useState<'up' | 'down'>('down');
@@ -74,7 +74,7 @@ export default function TimerSettings({ onSettingsChange }: TimerSettingsProps) 
         'intervalCount' in settings && 
         'soundEnabled' in settings) {
       
-      setIntervalDuration(settings.intervalDuration / 60); // Convert from seconds to minutes
+      setIntervalDuration(settings.intervalDuration);
       setIntervalCount(settings.intervalCount);
       setSoundEnabled(settings.soundEnabled);
       
@@ -97,7 +97,7 @@ export default function TimerSettings({ onSettingsChange }: TimerSettingsProps) 
   const handleSettingsChange = (field: string, value: number | boolean | string) => {
     let newSettings: TimerSettingsData = { 
       userId: 1, // Using placeholder user ID
-      intervalDuration: intervalDuration * 60, // Store in seconds
+      intervalDuration,
       intervalCount,
       soundEnabled,
       countDirection
@@ -105,16 +105,12 @@ export default function TimerSettings({ onSettingsChange }: TimerSettingsProps) 
 
     if (field === 'intervalDuration') {
       setIntervalDuration(value as number);
-      newSettings.intervalDuration = (value as number) * 60; // Convert to seconds
     } else if (field === 'intervalCount') {
       setIntervalCount(value as number);
-      newSettings.intervalCount = value as number;
     } else if (field === 'soundEnabled') {
       setSoundEnabled(value as boolean);
-      newSettings.soundEnabled = value as boolean;
     } else if (field === 'countDirection') {
       setCountDirection(value as 'up' | 'down');
-      newSettings.countDirection = value as 'up' | 'down';
     }
 
     // Notify parent component
@@ -145,14 +141,14 @@ export default function TimerSettings({ onSettingsChange }: TimerSettingsProps) 
               <SelectValue placeholder="Select duration" />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="1">1 minute</SelectItem>
-              <SelectItem value="2">2 minutes</SelectItem>
-              <SelectItem value="3">3 minutes</SelectItem>
-              <SelectItem value="5">5 minutes</SelectItem>
-              <SelectItem value="10">10 minutes</SelectItem>
-              <SelectItem value="15">15 minutes</SelectItem>
-              <SelectItem value="20">20 minutes</SelectItem>
-              <SelectItem value="30">30 minutes</SelectItem>
+              <SelectItem value="60">1 minute</SelectItem>
+              <SelectItem value="120">2 minutes</SelectItem>
+              <SelectItem value="180">3 minutes</SelectItem>
+              <SelectItem value="300">5 minutes</SelectItem>
+              <SelectItem value="600">10 minutes</SelectItem>
+              <SelectItem value="900">15 minutes</SelectItem>
+              <SelectItem value="1200">20 minutes</SelectItem>
+              <SelectItem value="1800">30 minutes</SelectItem>
             </SelectContent>
           </Select>
         </div>
